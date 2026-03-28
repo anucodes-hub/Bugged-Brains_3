@@ -136,5 +136,5 @@ pip install streamlit opencv-python numpy pandas plotly pillow transformers torc
 ```bash
 streamlit run app.py
 ```
-
+YouTube: https://youtu.be/mELM_rSVXxw?si=h5Sp1R5Z1lIEG6_6
 ---
