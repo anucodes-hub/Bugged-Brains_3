@@ -51,9 +51,70 @@ Synapse utilizes a **Hybrid Dual-Stream Architecture**:
 
 ---
 
-## 🏗️ 4. Solution Architecture (Optional)
+## 🏗️ 4. Solution Architecture 
 
 ### **The "Consensus Engine" Workflow**
+
+## Phase 1: Computer Vision (The "Body")
+
+Before the AI even looks at the image, we use **OpenCV** to detect the physical boundaries of the particles.
+
+**Preprocessing:**  
+- Convert the image to **grayscale** and apply a **Gaussian Blur** to remove microscopic noise (dust), avoiding false positives.  
+
+**Segmentation (Otsu’s Thresholding):**  
+- Automatically calculates the optimal lighting threshold to separate dark plastic from a light background.  
+
+**Contour Extraction:**  
+- Detects the **outline** of every object.  
+
+**Feature Engineering:**  
+- Calculate three specific mathematical ratios for each particle:  
+  - **Aspect Ratio:** Length ÷ Width  
+  - **Solidity:** How "dense" or "filled-in" the shape is  
+  - **Circularity:** How close the shape is to a perfect circle  
+
+---
+
+## Phase 2: AI Vision (The "Brain")
+
+Once a particle crop is obtained, it is analyzed with **CLIP (Contrastive Language-Image Pre-training)**.
+
+**Zero-Shot Classification:**  
+- Unlike standard CNNs limited to predefined classes, CLIP understands concepts like "synthetic fiber" vs. "spherical pellet" due to training on millions of internet images and captions.  
+
+**Explainability (Grad-CAM):**  
+- A **ResNet50 CNN** generates a heatmap highlighting the pixels (edges, textures, or colors) that influenced the AI’s prediction.
+
+---
+
+## Phase 3: The Consensus Engine (The "Judge")
+
+Resolves conflicts between geometric analysis and AI classification based on **physical size (μm)**:  
+
+- **Small-Scale Rule (<500 μm):**  
+  - Skeptical of “Fiber” labels, defaults to Fragment unless AI confidence > 80%  
+- **Large-Scale Rule (>2000 μm):**  
+  - Geometry is trusted to classify Films or Pellets  
+- **Mid-Range Rule (500–2000 μm):**  
+  - AI acts as the tie-breaker if confidence > 65%  
+
+---
+
+## Phase 4: Ecological Impact Scoring
+
+Transforms classifications into actionable ecological data:
+
+**Risk Index:**  
+- **Bioavailability:** Smaller particles are more dangerous  
+- **Size Penalty:** Risk increases as size decreases  
+- **Morphology Weight:** Fibers are 1.2× more toxic than smooth pellets  
+
+**Water Health Score:**  
+- Start with 100 points  
+- Subtract points based on particle concentration  
+- Subtract points based on average Risk Index
+  
 1.  **Segmentation:** OpenCV detects a particle and calculates geometric features.
 2.  **AI Audit:** CLIP provides a probability distribution for the 4 classes.
 3.  **Refined Logic:** * If **Size $< 500\mu m$**: System favors **Fragment** unless AI is $>80\%$ confident of a **Fiber**.
